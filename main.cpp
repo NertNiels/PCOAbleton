@@ -1,7 +1,8 @@
 #include <iostream>
 #include <cpr/cpr.h>
+#include "pcoapi.h"
 
-void say() {
+void cprCall() {
     cpr::Response r = cpr::Get(cpr::Url{"https://api.github.com/repos/whoshuu/cpr/contributors"},
                                cpr::Authentication{"user", "pass", cpr::AuthMode::BASIC},
                                cpr::Parameters{{"anon", "true"}, {"key", "value"}});
@@ -14,7 +15,8 @@ void say() {
 }
 
 int main() {
-    std::cout << "Hello World" << std::endl;
-    say();
+    //cprCall();
+    pcoapi();
+    
     return 0;
 }

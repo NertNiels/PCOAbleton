@@ -20,7 +20,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-add_executable(pco_ableton main.cpp)
+add_executable(pco_ableton main.cpp pcoapi.cpp)
 
 if(WIN32) # Install dlls in the same directory as the executable on Windows
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -31,5 +31,8 @@ include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
                          GIT_TAG 3020c34ae2b732121f37433e61599c34535e68a8) # The commit hash for 1.10.x. Replace with the latest from: https://github.com/libcpr/cpr/releases
 FetchContent_MakeAvailable(cpr)
-
 target_link_libraries(pco_ableton PRIVATE cpr::cpr)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+target_link_libraries(pco_ableton PRIVATE nlohmann_json::nlohmann_json)
