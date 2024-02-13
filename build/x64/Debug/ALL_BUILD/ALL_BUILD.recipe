@@ -5,7 +5,16 @@
       <FullPath>C:\Dev\pcoableton\build\x64\Debug\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
+      <FullPath>C:\Dev\pcoableton\build\Debug\libcurl-d.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\Dev\pcoableton\build\Debug\cpr.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
       <FullPath>C:\Dev\pcoableton\build\Debug\pco_ableton.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\Dev\pcoableton\build\Debug\zlib.dll</FullPath>
     </ProjectOutput>
     <ProjectOutput>
       <FullPath>C:\Dev\pcoableton\build\x64\Debug\ALL_BUILD</FullPath>

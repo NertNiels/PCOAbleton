@@ -1,6 +1,6 @@
 ^C:\DEV\PCOABLETON\BUILD\CMAKEFILES\D3E8CFF5D6638B8C334D1C6FC5A72BFF\GENERATE.STAMP.RULE
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Dev/pcoableton -BC:/Dev/pcoableton/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Dev/pcoableton/build/pco_ableton.sln
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Dev/pcoableton -BC:/Dev/pcoableton/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Dev/pcoableton/build/cpr_example.sln
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
