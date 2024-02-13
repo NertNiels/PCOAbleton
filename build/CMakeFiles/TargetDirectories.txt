@@ -1,0 +1,4 @@
+C:/Dev/pcoableton/build/CMakeFiles/pco_ableton.dir
+C:/Dev/pcoableton/build/CMakeFiles/PACKAGE.dir
+C:/Dev/pcoableton/build/CMakeFiles/ALL_BUILD.dir
+C:/Dev/pcoableton/build/CMakeFiles/ZERO_CHECK.dir
