@@ -39,19 +39,67 @@ void getauth() {
 
 void pcoapi() {
     getauth();
-    service_type* a = get_servicetypes();
+
+    std::vector<service_type> servicetypes = get_servicetypes();
+    for(int i = 0; i < servicetypes.size(); i++) {
+        servicetypes[i].plans = get_serviceplans(servicetypes[i].id, true, true);
+        std::cout;
+    }
+
+    for(service_type a : servicetypes) {
+        std::cout << a.name << std::endl;
+        for(service_plan it : a.plans) {
+            std::cout << "\t- Date: " << it.date << ", ID: " << it.id << ", Title: " << it.title << std::endl;
+        }
+    }
 }
 
-service_type* get_servicetypes() {
+std::vector<service_type> get_servicetypes() {
     nlohmann::json obj = callapi(api_services_service_types);
 
-    service_type *a{ new service_type[obj["data"].size()]{} }; 
-    int i = 0;
+    std::vector<service_type> a;
     for(auto it : obj["data"]) {
-
-        a[i].id = it["id"];
-        a[i].name = it["attributes"]["name"];
-        i++;
+        service_type s;
+        s.id = it["id"];
+        s.name = (it["attributes"]["name"]==nullptr ? "No name" : it["attributes"]["name"]);
+        a.push_back(s);
     }
+    return a;
+}
+
+void sort_serviceplans(std::vector<service_plan> *a, nlohmann::json obj) {
+    bool get = true;
+    while(get) {
+        for(auto it : obj["data"]) {
+            service_plan p;
+            p.id = it["id"];
+            p.title = (it["attributes"]["title"]==nullptr ? "-" : it["attributes"]["title"]);
+            p.date = (it["attributes"]["dates"]==nullptr ? "No dates" : it["attributes"]["dates"]);
+            a->push_back(p);
+        }
+        if(obj["links"]["next"]==nullptr) get=false;
+        else obj = callapi(obj["links"]["next"]);
+    }
+}
+
+std::vector<service_plan> get_serviceplans(std::string servicetype, bool future, bool no_dates) {
+    nlohmann::json obj = callapi(api_services_service_types + "/" + servicetype + "/plans" + (future ? "?filter=future" : ""));
+    std::vector<service_plan> a;
+    bool get = true;
+    // while(get) {
+    //     for(auto it : obj["data"]) {
+    //         service_plan p;
+    //         p.id = it["id"];
+    //         p.title = (it["attributes"]["title"]==nullptr ? "-" : it["attributes"]["title"]);
+    //         p.date = (it["attributes"]["dates"]==nullptr ? "No dates" : it["attributes"]["dates"]);
+    //         a.push_back(p);
+    //     }
+    //     if(obj["links"]["next"]==nullptr) get = false;
+    //     else obj = callapi(obj["links"]["next"]);
+    // }
+    sort_serviceplans(&a, obj);
+    get = no_dates;
+    if(get) obj = callapi(api_services_service_types + "/" + servicetype + "/plans?filter=no_dates");
+    sort_serviceplans(&a, obj);
     return a;
 }
