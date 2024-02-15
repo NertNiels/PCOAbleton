@@ -68,9 +68,9 @@ void print_serviceplanitems(std::string stype, std::string p) {
 
 void print_overview() {
     for(pcoapi::service_type a : service_types) {
-        std::cout << a.name << ": " << a.id << std::endl;
+        std::cout << a.name << ": " << a.id << ", Last update: " << ctime(&a.last_api_update);
         for(pcoapi::service_plan it : a.plans) {
-            std::cout << "\t- Date: " << it.date << ", ID: " << it.id << ", Title: " << it.title << std::endl;
+            std::cout << "\t- Date: " << it.date << ", ID: " << it.id << ", Title: " << it.title << ", Last update: " << ctime(&it.last_api_update);
             for(pcoapi::service_plan_item pi : it.items) {
                 std::cout << "\t\t- Title: " << pi.title << ", Length: " << pi.length << ", ID: " << pi.id << std::endl;\
             }

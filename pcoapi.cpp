@@ -60,6 +60,7 @@ namespace pcoapi {
             service_type s;
             s.id = it["id"];
             s.name = (it["attributes"]["name"]==nullptr ? "No name" : it["attributes"]["name"]);
+            s.last_api_update = time(0);
             a.push_back(s);
         }
         return a;
@@ -74,6 +75,7 @@ namespace pcoapi {
                 p.title = (it["attributes"]["title"]==nullptr ? "-" : it["attributes"]["title"]);
                 p.date = (it["attributes"]["dates"]==nullptr ? "No dates" : it["attributes"]["dates"]);
                 p.parent = (it["relationships"]["service_type"]["data"]["id"]);
+                p.last_api_update = time(0);
                 a->push_back(p);
             }
             if(obj["links"]["next"]==nullptr) get=false;
@@ -126,11 +128,17 @@ namespace pcoapi {
         *meter = obj["data"]["attributes"]["meter"];
     }
 
-    void load_serviceplans(service_type *servicetype) {
-        servicetype->plans = get_serviceplans(servicetype->id, true, true);
+    void load_serviceplans(service_type *servicetype, bool refresh) {
+        if(servicetype->plans.size()==0||refresh) {
+            servicetype->plans = get_serviceplans(servicetype->id, true, true);
+            servicetype->last_api_update = time(0);
+        }
     }
 
-    void load_serviceplanitems(service_plan *serviceplan) {
-        serviceplan->items = get_serviceplanitems(serviceplan->parent, serviceplan->id);
+    void load_serviceplanitems(service_plan *serviceplan, bool refresh) {
+        if(serviceplan->items.size()==0||refresh) {
+            serviceplan->items = get_serviceplanitems(serviceplan->parent, serviceplan->id);
+            serviceplan->last_api_update = time(0);
+        }
     }
 }
