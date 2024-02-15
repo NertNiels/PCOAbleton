@@ -1,9 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include "pcoapi.h"
-
-#include <GLFW/glfw3.h>
-#include <GL/glew.h>
+#include "gui.h"
 
 void handle_input();
 
