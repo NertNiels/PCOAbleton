@@ -2,6 +2,8 @@
 #include <ctime>
 #include "pcoapi.h"
 
+#include <GLFW/glfw3.h>
+
 void handle_input();
 
 std::vector<pcoapi::service_type> service_types;
