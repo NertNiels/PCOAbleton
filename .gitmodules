@@ -4,9 +4,9 @@
 [submodule "external/glew"]
 	path = external/glew
 	url = https://github.com/Perlmint/glew-cmake
-[submodule "external/imgui/imgui"]
-	path = external/imgui/imgui
-	url = https://github.com/ocornut/imgui
 [submodule "external/cpr"]
 	path = external/cpr
 	url = https://github.com/libcpr/cpr
+[submodule "external/imgui/imgui"]
+	path = external/imgui/imgui
+	url = https://github.com/ocornut/imgui
