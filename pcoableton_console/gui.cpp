@@ -312,7 +312,7 @@ GLFWwindow* window;
         if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
             counter++;
         ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
+        ImGui::Text("TEST COUNTER = %d", counter);
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", &f, io.Framerate);
         ImGui::End();
