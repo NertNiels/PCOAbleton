@@ -45,3 +45,6 @@ target_link_libraries(pco_ableton PRIVATE glfw)
 
 add_subdirectory(external/glew)
 target_link_libraries(pco_ableton PRIVATE libglew_static)
+
+add_subdirectory(external/imgui)
+target_link_libraries(pco_ableton PRIVATE imgui)
