@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(cpr_example)
-
-set(CMAKE_CXX_STANDARD 17)
+project(pcoableton)
 
 # Set to C++ 11 if you are using cpr <= 1.9.x
 # More: https://github.com/libcpr/cpr#supported-releases
@@ -20,33 +18,37 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-add_executable(pco_ableton main.cpp pcoapi.cpp gui.cpp)
-
 if(WIN32) # Install dlls in the same directory as the executable on Windows
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 endif()
 
+# CPR
 include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
                          GIT_TAG 3020c34ae2b732121f37433e61599c34535e68a8) # The commit hash for 1.10.x. Replace with the latest from: https://github.com/libcpr/cpr/releases
 FetchContent_MakeAvailable(cpr)
-target_link_libraries(pco_ableton PRIVATE cpr::cpr)
 
+# NLOHMANN JSON
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
-target_link_libraries(pco_ableton PRIVATE nlohmann_json::nlohmann_json)
 
+# GLFW
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_SHARED_LIBRARY ON CACHE BOOL "" FORCE)
 add_subdirectory(external/glfw)
-target_link_libraries(pco_ableton PUBLIC glfw)
 
+# GLEW
 add_subdirectory(external/glew)
-target_link_libraries(pco_ableton PUBLIC libglew_static)
 
+# IMGUI
 set(GLFW_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include)
 add_subdirectory(external/imgui)
-target_link_libraries(pco_ableton PUBLIC imgui)
+
+# PCOABLETON
+add_subdirectory(pcoableton)
+
+# PCOABLETON CONSOLE
+add_subdirectory(pcoableton_console)
