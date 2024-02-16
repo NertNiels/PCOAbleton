@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(pcoableton)
 
+set(CMAKE_CXX_STANDARD 17)
+
 # Set to C++ 11 if you are using cpr <= 1.9.x
 # More: https://github.com/libcpr/cpr#supported-releases
 # set(CMAKE_CXX_STANDARD 11)
@@ -24,12 +26,10 @@ if(WIN32) # Install dlls in the same directory as the executable on Windows
 endif()
 
 # CPR
-include(FetchContent)
-FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
-                         GIT_TAG 3020c34ae2b732121f37433e61599c34535e68a8) # The commit hash for 1.10.x. Replace with the latest from: https://github.com/libcpr/cpr/releases
-FetchContent_MakeAvailable(cpr)
+add_subdirectory(external/cpr)
 
 # NLOHMANN JSON
+include(FetchContent)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
