@@ -50,5 +50,6 @@ add_subdirectory(external/imgui)
 # PCOABLETON
 add_subdirectory(pcoableton)
 
-# PCOABLETON CONSOLE
+# PCOABLETON CONSOLE and GUI
 add_subdirectory(pcoableton_console)
+add_subdirectory(pcoableton_gui)

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <ctime>
 #include <pcoableton/pcoapi.h>
-#include "gui.h"
 
 void handle_input();
 

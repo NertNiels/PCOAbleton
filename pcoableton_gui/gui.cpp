@@ -339,3 +339,10 @@ GLFWwindow* window;
     // Exit program
     exit( EXIT_SUCCESS );
 }
+
+
+int main() {
+  gui();
+
+  return 0;
+}

@@ -1,8 +1,7 @@
 #include "main.h"
 
 int main() {
-    gui();
-
+    std::cout << "hallo" << std::endl;
     pcoapi::authenticate();
 
     service_types = pcoapi::get_servicetypes();
