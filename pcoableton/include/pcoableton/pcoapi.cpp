@@ -1,6 +1,7 @@
 #include "pcoapi.h"
 
 namespace pcoapi {
+    std::string api_root = "https://api.planningcenteronline.com/api/v2";
     std::string api_services = "https://api.planningcenteronline.com/services/v2";
     std::string api_services_people = "https://api.planningcenteronline.com/services/v2/people";
     std::string api_services_songs = "https://api.planningcenteronline.com/services/v2/songs";
@@ -16,6 +17,7 @@ namespace pcoapi {
         if(r.status_code != 200) {
             std::cerr << "API responded with error code: " << r.status_code << std::endl;
             std::cerr << r.raw_header << std::endl;
+            std::cerr << r.text << std::endl;
             return nullptr;
         }
         nlohmann::json obj = nlohmann::json::parse(r.text);
@@ -122,10 +124,11 @@ namespace pcoapi {
         return a;
     }
 
-    void get_arrangementinfo(std::string song, std::string arrangement, int *bpm, std::string *meter) {
+    void get_arrangementinfo(std::string song, std::string arrangement, float *bpm, std::string *meter) {
         nlohmann::json obj = callapi(api_services_songs+"/"+song+"/arrangements/"+arrangement);
-        *bpm = obj["data"]["attributes"]["bpm"];
-        *meter = obj["data"]["attributes"]["meter"];
+        std::cout << "DEBUG: " << obj << std::endl;
+        *bpm = (obj["data"]["attributes"]["bpm"] == nullptr ? .0f : obj["data"]["attributes"]["bpm"]);
+        *meter = (obj["data"]["attributes"]["meter"] == nullptr ? "" : obj["data"]["attributes"]["meter"]);
     }
 
     void load_serviceplans(service_type *servicetype, bool refresh) {
@@ -140,5 +143,15 @@ namespace pcoapi {
             serviceplan->items = get_serviceplanitems(serviceplan->parent, serviceplan->id);
             serviceplan->last_api_update = time(0);
         }
+    }
+
+    organization get_organization() {
+        nlohmann::json obj = callapi(api_root);
+        organization o;
+        o.person_first_name = (obj["attributes"]["first_name"]==nullptr ? "-" : obj["attributes"]["first_name"]);
+        o.person_last_name = (obj["attributes"]["last_name"]==nullptr ? "-" : obj["attributes"]["last_name"]);
+        o.service_types = get_servicetypes();
+
+        return o;
     }
 }
