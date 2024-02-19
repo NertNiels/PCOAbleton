@@ -1,9 +1,12 @@
+#define PCOAPI_LOAD_ASYNC 1
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
 #include <ctime>
+#include <future>
 
 namespace pcoapi {
     struct service_plan_item {
@@ -20,6 +23,8 @@ namespace pcoapi {
     };
 
     struct service_plan {
+        bool loading = 0;
+
         std::string parent;
         std::string id;
         std::string title;
@@ -30,6 +35,8 @@ namespace pcoapi {
     };
 
     struct service_type {
+        bool loading = 0;
+
         std::string id;
         std::string name;
         std::vector<service_plan> plans;
@@ -38,6 +45,8 @@ namespace pcoapi {
     };
 
     struct organization {
+        bool loading = 0;
+
         std::string person_first_name;
         std::string person_last_name;
         std::string organization_name;
@@ -59,7 +68,11 @@ namespace pcoapi {
     std::vector<service_type> get_overview();
     std::vector<service_plan_item> get_serviceplanitems(std::string servicetype, std::string serviceplan);
     void get_arrangementinfo(std::string song, std::string arragement, float *bpm, std::string *meter);
+    static void load_serviceplans_async(service_type *servicetype);
     void load_serviceplans(service_type *servicetype, bool refresh=false);
     void load_serviceplanitems(service_plan *serviceplan, bool refresh=false);
     organization get_organization();
+
+    static std::mutex organization_mutex;
+    static std::vector<std::future<void>> futures;
 }

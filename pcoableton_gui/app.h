@@ -1,6 +1,9 @@
+#define PCOAPI_LOAD_ASYNC 1
+
 #include <iostream>
 #include <imgui.h>
 #include <pcoableton/pcoapi.h>
+
 
 namespace guiapp {
     

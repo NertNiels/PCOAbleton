@@ -131,18 +131,51 @@ namespace pcoapi {
         *meter = (obj["data"]["attributes"]["meter"] == nullptr ? "" : obj["data"]["attributes"]["meter"]);
     }
 
+    static void load_serviceplans_async(service_type *servicetype) {
+        std::vector<service_plan> plans = get_serviceplans(servicetype->id, true, true);
+
+        std::lock_guard<std::mutex> lock(organization_mutex);
+        servicetype->plans = plans;
+        servicetype->last_api_update = time(0);
+        servicetype->loading = false;
+    }
+
+    static void load_serviceplanitems_async(service_plan *serviceplan) {
+        std::vector<service_plan_item> items = get_serviceplanitems(serviceplan->parent, serviceplan->id);
+
+        std::lock_guard<std::mutex> lock(organization_mutex);
+        serviceplan->items = items;
+        serviceplan->last_api_update = time(0);
+        serviceplan->loading = false;
+    }
+
     void load_serviceplans(service_type *servicetype, bool refresh) {
+#if PCOAPI_LOAD_ASYNC
+        if(servicetype->plans.size()==0||refresh) {
+            servicetype->loading = true;
+            futures.push_back(std::async(std::launch::async, load_serviceplans_async, servicetype));
+        }
+        std::cout << "help" << std::endl;
+#else
         if(servicetype->plans.size()==0||refresh) {
             servicetype->plans = get_serviceplans(servicetype->id, true, true);
             servicetype->last_api_update = time(0);
         }
+#endif
     }
 
     void load_serviceplanitems(service_plan *serviceplan, bool refresh) {
+#if PCOAPI_LOAD_ASYNC
+        if(serviceplan->items.size()==0||refresh) {
+            serviceplan->loading = true;
+            futures.push_back(std::async(std::launch::async, load_serviceplanitems_async, serviceplan));
+        }
+#else
         if(serviceplan->items.size()==0||refresh) {
             serviceplan->items = get_serviceplanitems(serviceplan->parent, serviceplan->id);
             serviceplan->last_api_update = time(0);
         }
+#endif
     }
 
     organization get_organization() {
