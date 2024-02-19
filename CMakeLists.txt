@@ -47,6 +47,9 @@ add_subdirectory(external/glew)
 set(GLFW_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include)
 add_subdirectory(external/imgui)
 
+# ABLETON LINK
+include(external/link/AbletonLinkConfig.cmake)
+
 # PCOABLETON
 add_subdirectory(pcoableton)
 
