@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include <pcoableton/pcoapi.h>
+#include <pcoableton/metronome.h>
 
 
 void handle_input();

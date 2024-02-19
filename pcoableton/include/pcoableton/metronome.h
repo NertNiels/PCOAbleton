@@ -1,0 +1,3 @@
+namespace metronome {
+    void start();
+}

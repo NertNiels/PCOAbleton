@@ -49,6 +49,7 @@ add_subdirectory(external/imgui)
 
 # ABLETON LINK
 include(external/link/AbletonLinkConfig.cmake)
+# add_subdirectory(external/link)
 
 # PCOABLETON
 add_subdirectory(pcoableton)

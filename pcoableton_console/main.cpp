@@ -1,6 +1,8 @@
 #include "main.h"
 
 int main() {
+    metronome::start();
+
     std::cout << "hallo" << std::endl;
     pcoapi::authenticate();
 
