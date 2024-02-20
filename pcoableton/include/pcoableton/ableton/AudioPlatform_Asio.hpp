@@ -24,7 +24,7 @@
 #include <ableton/Link.hpp>
 #include <ableton/link/HostTimeFilter.hpp>
 
-#include "asio/asiosys.h" // Should be included before asio.h
+#include "asiosys.h" // Should be included before asio.h
 
 #include "asio.hpp"
 #include "asiodrivers.h"
