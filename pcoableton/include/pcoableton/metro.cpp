@@ -1,24 +1,19 @@
 #include "metro.h"
 
-metronome::state _state;
 double _quantum = 4.;
 
-const std::chrono::microseconds now() {
-    return _state.link.clock().micros();
-}
-
 bool metronome::link_enabled() {
-    return _state.link.isEnabled();
+    return _link.isEnabled();
 }
 
 bool metronome::link_enabled(bool enabled) {
-    _state.link.enable(enabled);
+    _link.enable(enabled);
     return enabled;
 }
 
 
 int metronome::link_num_peers(){
-    return _state.link.numPeers();
+    return _link.numPeers();
 }
 
 // Get quantum
@@ -34,44 +29,40 @@ double metronome::quantum(double quantum){
 
 // Get playing
 bool metronome::playing(){
-    return _state.link.captureAppSessionState().isPlaying();
+    return _link.captureAppSessionState().isPlaying();
 }
 
 // Set playing
 bool metronome::playing(bool playing){
-    auto sessionState = _state.link.captureAppSessionState();
+    auto sessionState = _link.captureAppSessionState();
     sessionState.setIsPlayingAndRequestBeatAtTime(true, now(), 0., _quantum);
-    _state.link.commitAppSessionState(sessionState);
+    _link.commitAppSessionState(sessionState);
     return playing;
 }
 
 
 // Get tempo
 double metronome::current_tempo(){
-    auto sessionState = _state.link.captureAppSessionState();
+    auto sessionState = _link.captureAppSessionState();
     return sessionState.tempo();
 }
 
 // Set tempo
 double metronome::current_tempo(double tempo){
-    auto sessionState = _state.link.captureAppSessionState();
+    auto sessionState = _link.captureAppSessionState();
     sessionState.setTempo(tempo, now());
-    _state.link.commitAppSessionState(sessionState);
+    _link.commitAppSessionState(sessionState);
     return tempo;
 }
 
 // Get beat
 double metronome::link_beat(){
-    auto sessionState = _state.link.captureAppSessionState();
+    auto sessionState = _link.captureAppSessionState();
     return sessionState.beatAtTime(now(), _quantum);
 }
 
 // Get phase
 double metronome::phase(){
-    auto sessionState = _state.link.captureAppSessionState();
+    auto sessionState = _link.captureAppSessionState();
     return sessionState.phaseAtTime(now(), _quantum);
-}
-
-void metronome::start() {
-
 }

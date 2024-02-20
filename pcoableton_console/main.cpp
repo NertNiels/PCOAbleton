@@ -1,7 +1,8 @@
 #include "main.h"
 
+metronome metro;
+
 int main() {
-    metronome::start();
 
     std::cout << "hallo" << std::endl;
     pcoapi::authenticate();
@@ -40,6 +41,14 @@ void handle_input() {
                 pcoapi::load_serviceplanitems(&service_types[i].plans[j]);
             }
         }
+    } else if(c == "link") {
+        std::cout << "Current state of LINK:" << std::endl;
+        std::cout << "Peers connected: " << metro.link_num_peers() << std::endl;
+        std::cout << "Link enabled: " << metro.link_enabled() << std::endl;
+        std::cout << "Playing: " << metro.playing() << std::endl;
+        std::cout << "Current tempo: " << metro.current_tempo() << std::endl;
+        std::cout << "Current quantum: " << metro.quantum() << std::endl;
+        std::cout << "Current ceat: " << metro.link_beat() << std::endl;
     }
     else {
         std::cout << "Command \"" << c << "\" unknown..." << std::endl;
@@ -70,6 +79,7 @@ void print_serviceplanitems(std::string stype, std::string p) {
 }
 
 void print_overview() {
+    std::cout << "------------------------------------------" << std::endl;
     for(pcoapi::service_type a : service_types) {
         std::cout << a.name << ": " << a.id << ", Last update: " << ctime(&a.last_api_update);
         for(pcoapi::service_plan it : a.plans) {
