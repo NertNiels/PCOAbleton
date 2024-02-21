@@ -67,7 +67,7 @@ int main() {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Setup main app
-    guiapp::setup();
+    guiapp *app = new guiapp();
 
     // Main loop
     while(!glfwWindowShouldClose(window)) {
@@ -80,7 +80,7 @@ int main() {
         ImGui::NewFrame();
 
         // Update app
-        guiapp::update();
+        app->update();
 
         // Rendering
         ImGui::Render();

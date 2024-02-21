@@ -2,13 +2,20 @@
 
 #include <iostream>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <pcoableton/pcoapi.h>
+#include <pcoableton/metro.h>
 
 
-namespace guiapp {
+class guiapp {
     
-    static pcoapi::organization pco_organization;
+    private:
+        pcoapi::organization pco_organization;
+        metronome& metro;
+        void setup();
 
-    void setup();
-    void update();
+    public:
+        void update();
+        guiapp::guiapp() : metro(*(new metronome())) { setup(); }
+
 };

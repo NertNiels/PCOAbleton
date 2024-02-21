@@ -5,7 +5,7 @@ class metronome {
     
     public:
         metronome() : _link(120.) {
-            link_enabled(true);
+            link_enabled(false);
         }
 
         // Getters
