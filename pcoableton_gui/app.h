@@ -5,6 +5,7 @@
 #include <imgui_internal.h>
 #include <pcoableton/pcoapi.h>
 #include <pcoableton/metro.h>
+#include "audio_handler.h"
 
 
 class guiapp {

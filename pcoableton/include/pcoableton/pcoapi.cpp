@@ -179,10 +179,10 @@ namespace pcoapi {
     }
 
     organization get_organization() {
-        nlohmann::json obj = callapi(api_root);
+        // nlohmann::json obj = callapi(api_root);
         organization o;
-        o.person_first_name = (obj["attributes"]["first_name"]==nullptr ? "-" : obj["attributes"]["first_name"]);
-        o.person_last_name = (obj["attributes"]["last_name"]==nullptr ? "-" : obj["attributes"]["last_name"]);
+        // o.person_first_name = (obj["attributes"]["first_name"]==nullptr ? "-" : obj["attributes"]["first_name"]);
+        // o.person_last_name = (obj["attributes"]["last_name"]==nullptr ? "-" : obj["attributes"]["last_name"]);
         o.service_types = get_servicetypes();
 
         return o;
