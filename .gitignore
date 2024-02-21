@@ -3,3 +3,4 @@ build/
 .vscode/
 auth.txt
 imgui.ini
+external/asio

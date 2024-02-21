@@ -54,6 +54,9 @@ include(external/link/AbletonLinkConfig.cmake)
 # PCOABLETON
 add_subdirectory(pcoableton)
 
+# ASIO
+add_subdirectory(external)
+
 # PCOABLETON CONSOLE and GUI
 add_subdirectory(pcoableton_console)
 add_subdirectory(pcoableton_gui)
