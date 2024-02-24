@@ -4,7 +4,9 @@ void guiapp::setup() {
     pcoapi::authenticate();
     pco_organization = pcoapi::get_organization();
     metro.link_enabled(true);
-    audio_handler::audio_engine engine;
+    
+    static audio_handler::audio_engine engine;
+    
 }
 
 void guiapp::update() {

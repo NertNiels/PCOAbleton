@@ -1,12 +1,16 @@
 #include "audio_handler.h"
 #undef max
 
+#define AUDIO_DEVICE_NAME "UMC ASIO Driver"
+
 using namespace audio_handler;
 
 audio_engine::audio_engine() {
     init();
-    start();
+    set_buffer_size(_preferredSize);
+    set_sample_rate(_sampleRate);
     engine = this;
+    start();
 }
 
 audio_engine::~audio_engine() {
@@ -19,16 +23,18 @@ audio_engine::~audio_engine() {
 void audio_engine::start() {
     ASIOError result = ASIOStart();
     if(result != ASE_OK) asio_fatalError(result, "ASIOStart");
+    std::cout << "ASIO successfully started" << std::endl;
 }
 
 void audio_engine::stop() {
     ASIOError result = ASIOStop();
     if(result != ASE_OK) asio_fatalError(result, "ASIOStop");
+    std::cout << "ASIO stopped" << std::endl;
 }
 
 void audio_engine::init() {
-    if(!loadAsioDriver("ASIO4ALL v2")) {
-        std::cerr << "Failed to open ASIO driver " << "ASIO4ALL v2" << std::endl;
+    if(!loadAsioDriver(AUDIO_DEVICE_NAME)) {
+        std::cerr << "Failed to open ASIO driver " << AUDIO_DEVICE_NAME << std::endl;
         throw 1;
     }
 
@@ -43,8 +49,10 @@ void audio_engine::init() {
     init_driver();
 
     ASIOCallbacks *callbacks = &(_asio_callbacks);
-    callbacks->bufferSwitch = buffer_switch;
-    callbacks->bufferSwitchTimeInfo = buffer_switch_time_info;
+    callbacks->bufferSwitch = &buffer_switch;
+    callbacks->bufferSwitchTimeInfo = &buffer_switch_time_info;
+    callbacks->asioMessage = &asio_message;
+    callbacks->sampleRateDidChange = &sample_rate_did_change;
     createAsioBuffers();
 }
 
@@ -53,6 +61,10 @@ void audio_engine::init_driver() {
     if(result != ASE_OK) asio_fatalError(result, "ASIOGetChannels");
     std::cout << " - input channels: " << _inputChannels << std::endl;
     std::cout << " - output channels: " << _outputChannels << std::endl;
+
+    _bufferInfos = new ASIOBufferInfo[_inputChannels+_outputChannels];
+    _channelInfos = new ASIOChannelInfo[_inputChannels+_outputChannels];
+    
     
     long minSize, maxSize, granularity;
     result = ASIOGetBufferSize(&minSize, &maxSize, &_preferredSize, &granularity);
@@ -71,7 +83,14 @@ void audio_engine::init_driver() {
 }
 
 void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
-    auto hostTime = std::chrono::microseconds(0);
+    // static std::chrono::microseconds lastHostTime;
+    static const std::chrono::time_point startHostTime = std::chrono::high_resolution_clock::now();
+    auto hostTime = std::chrono::duration_cast<std::chrono::microseconds>
+        (std::chrono::high_resolution_clock::now()-startHostTime);
+    // std::cout << (std::chrono::duration_cast<std::chrono::duration<double>>(hostTime-lastHostTime)).count() << std::endl;
+    // lastHostTime = hostTime;
+    // std::cout << hostTime.count() << ", " << timeInfo->timeInfo.samplePosition.lo << ", " << timeInfo->timeInfo.samplePosition.lo + timeInfo->timeInfo.samplePosition.hi * std::pow(2, 32) << std::endl;
+
     const auto bufferBeginAtOutput = hostTime + _output_latency.load();
     
     ASIOBufferInfo *bufferInfos = _bufferInfos;
@@ -79,7 +98,7 @@ void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
     const long numChannels = _numBuffers;
     const double maxAmp = std::numeric_limits<int>::max();
 
-    audio_callback_engine(bufferBeginAtOutput, numSamples);
+    audio_callback_engine(bufferBeginAtOutput, timeInfo->timeInfo.samplePosition.lo + timeInfo->timeInfo.samplePosition.hi * std::pow(2, 32), numSamples);
 
     for (long i = 0; i < numSamples; ++i)
     {
@@ -92,9 +111,10 @@ void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
     if(_outputReady) ASIOOutputReady();
 }
 
-void audio_engine::audio_callback_engine(const std::chrono::microseconds hostTime, const std::size_t numSamples) {
+void audio_engine::audio_callback_engine(const std::chrono::microseconds hostTime, double currentSample, const std::size_t numSamples) {
     std::fill(_buffer.begin(), _buffer.end(), 0);
-    // renderMetronomeIntoBuffer(); TODO: Make function
+    test_BEEP(hostTime, currentSample, numSamples);
+    // TODO: VIA CALLBACKS
 }
 
 void audio_engine::createAsioBuffers() {
@@ -150,4 +170,12 @@ void audio_engine::createAsioBuffers() {
 
     _output_latency.store(outputLatencyMicros);
     std::cout << " - total:" << outputLatencyMicros.count() << "usec" << std::endl;
+}
+
+void audio_engine::set_buffer_size(size_t size) {
+    _buffer = std::vector<double>(size, 0.);
+}
+
+void audio_engine::set_sample_rate(double samplerate) {
+    _sampleRate = samplerate;
 }
