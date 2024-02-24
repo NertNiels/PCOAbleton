@@ -59,6 +59,7 @@ private:
     ASIOBufferInfo* _bufferInfos;
     ASIOChannelInfo* _channelInfos;
     std::atomic<std::chrono::microseconds> _output_latency;
+    std::vector<std::pair<long, long>> _sampleTimePoints;
 
     std::vector<double> _buffer;
     
@@ -71,6 +72,7 @@ private:
     void audio_callback_engine(const std::chrono::microseconds hostTime, double currentSample, const std::size_t numSamples);
     void set_buffer_size(size_t size);
     void set_sample_rate(double samplerate);
+    std::chrono::microseconds calculateTimeAtSamplePosition(ASIOTime *time);
     ASIOCallbacks _asio_callbacks;
 
     std::chrono::microseconds lastHostTime;
@@ -79,27 +81,64 @@ private:
         static const double highTone = 1567.98;
         static const double lowTone = 1000;
 
-        auto beginHostTime2 = beginHostTime;
+        // auto beginHostTime2 = beginHostTime;
         // std::cout << std::this_thread::get_id << ": " << beginHostTime.count() << std::endl;
 
         const auto microsPerSample = 1e6 / _sampleRate;
         std::chrono::microseconds hostTime;
         for(size_t i = 0; i < numSamples; i++) {
             double amplitude = 0;
-            hostTime = beginHostTime2 + std::chrono::microseconds(llround(static_cast<double>(i) * microsPerSample));
-            const auto lastSampleHostTime = hostTime - std::chrono::microseconds(llround(microsPerSample));
+            hostTime = beginHostTime + std::chrono::microseconds(llround(static_cast<double>(i) * microsPerSample));
+            // const auto lastSampleHostTime = hostTime - std::chrono::microseconds(llround(microsPerSample));
             // const auto seconds = std::chrono::duration_cast<std::chrono::duration<double>>(hostTime);
-            const auto seconds = std::chrono::duration_cast<std::chrono::duration<double>>(hostTime);
-            amplitude = cos(4.*M_PI*(currentSample/512));
+            // const auto seconds = std::chrono::duration_cast<std::chrono::duration<double>>(hostTime);
+            // amplitude = cos(4.*M_PI*(currentSample/512));
+            amplitude = cos(2.*M_PI*hostTime.count()*0.001);
+            // std::cout << hostTime.count() << std::endl;
             _buffer[i] = amplitude;
             currentSample++;
         }
 
         // std::cout << std::chrono::duration_cast<std::chrono::microseconds>
         //                         (std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
-
+        
         lastHostTime = hostTime;
     }
+
+    long current_time_micros() {
+        static const auto nano_start_time = std::chrono::high_resolution_clock::now();
+        return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()-nano_start_time).count();
+    }
+
+    std::pair<long, long> lineairRegression() {
+        auto begin = _sampleTimePoints.begin();
+        auto end = _sampleTimePoints.end();
+
+        using NumberType = double;
+
+        NumberType sumX = 0.0;
+        NumberType sumXX = 0.0;
+        NumberType sumXY = 0.0;
+        NumberType sumY = 0.0;
+        for (auto i = begin; i != end; ++i)
+        {
+            sumX += i->first;
+            sumXX += i->first * i->first;
+            sumXY += i->first * i->second;
+            sumY += i->second;
+        }
+
+        const NumberType numPoints = static_cast<NumberType>(distance(begin, end));
+        const NumberType denominator = numPoints * sumXX - sumX * sumX;
+        const NumberType slope = denominator == NumberType{0}
+                                    ? NumberType{0}
+                                    : (numPoints * sumXY - sumX * sumY) / denominator;
+        const NumberType intercept = (sumY - slope * sumX) / numPoints;
+
+        return std::make_pair(slope, intercept);
+    }
+
+
 };
 
 static audio_engine *engine;

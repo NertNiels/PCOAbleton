@@ -82,11 +82,33 @@ void audio_engine::init_driver() {
     std::cout << " - output ready: " << (_outputReady ? "enabled" : "disabled") << std::endl;
 }
 
+std::chrono::microseconds audio_engine::calculateTimeAtSamplePosition(ASIOTime *timeInfo) {
+    static int index = 0;
+    static const int numPoints = 512;
+
+    const long sample = timeInfo->timeInfo.samplePosition.lo + timeInfo->timeInfo.samplePosition.hi * std::pow(2, 32);
+    
+    const auto micros = current_time_micros();
+    const auto point = std::make_pair(sample, micros);
+
+    if(_sampleTimePoints.size() < numPoints) _sampleTimePoints.push_back(point);
+    else _sampleTimePoints[index] = point;
+    index = (index + 1) % numPoints;
+
+    auto result = lineairRegression();
+
+    const auto hostTime = (result.first * sample) + result.second;
+
+    return std::chrono::microseconds(llround(hostTime));
+}
+
 void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
+
+    static int debug;
     // static std::chrono::microseconds lastHostTime;
-    static const std::chrono::time_point startHostTime = std::chrono::high_resolution_clock::now();
-    auto hostTime = std::chrono::duration_cast<std::chrono::microseconds>
-        (std::chrono::high_resolution_clock::now()-startHostTime);
+    auto hostTime = calculateTimeAtSamplePosition(timeInfo);
+    // auto hostTime = std::chrono::microseconds(current_time_micros());
+    debug++;
     // std::cout << (std::chrono::duration_cast<std::chrono::duration<double>>(hostTime-lastHostTime)).count() << std::endl;
     // lastHostTime = hostTime;
     // std::cout << hostTime.count() << ", " << timeInfo->timeInfo.samplePosition.lo << ", " << timeInfo->timeInfo.samplePosition.lo + timeInfo->timeInfo.samplePosition.hi * std::pow(2, 32) << std::endl;
@@ -105,7 +127,8 @@ void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
         for (long j = 0; j < numChannels; ++j)
         {
         int* buffer = static_cast<int*>(bufferInfos[j].buffers[index]);
-        buffer[i] = static_cast<int>(_buffer[i] * maxAmp);
+        // buffer[i] = static_cast<int>(_buffer[i] * maxAmp);
+        buffer[i] = static_cast<int>(cos(2.*M_PI*((double)(current_time_micros())*0.00001)) * maxAmp);
         }
     }
     if(_outputReady) ASIOOutputReady();
@@ -113,7 +136,7 @@ void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
 
 void audio_engine::audio_callback_engine(const std::chrono::microseconds hostTime, double currentSample, const std::size_t numSamples) {
     std::fill(_buffer.begin(), _buffer.end(), 0);
-    test_BEEP(hostTime, currentSample, numSamples);
+    //test_BEEP(hostTime, currentSample, numSamples);
     // TODO: VIA CALLBACKS
 }
 
