@@ -1,7 +1,7 @@
 #include "audio_handler.h"
 #undef max
 
-#define AUDIO_DEVICE_NAME "UMC ASIO Driver"
+#define AUDIO_DEVICE_NAME "ASIO4ALL v2"
 
 using namespace audio_handler;
 
@@ -9,6 +9,7 @@ audio_engine::audio_engine() {
     init();
     set_buffer_size(_preferredSize);
     set_sample_rate(_sampleRate);
+
     engine = this;
     start();
 }
@@ -106,8 +107,8 @@ void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
 
     static int debug;
     // static std::chrono::microseconds lastHostTime;
-    auto hostTime = calculateTimeAtSamplePosition(timeInfo);
-    // auto hostTime = std::chrono::microseconds(current_time_micros());
+    // auto hostTime = calculateTimeAtSamplePosition(timeInfo);
+    auto hostTime = std::chrono::microseconds(current_time_micros());
     debug++;
     // std::cout << (std::chrono::duration_cast<std::chrono::duration<double>>(hostTime-lastHostTime)).count() << std::endl;
     // lastHostTime = hostTime;
@@ -127,8 +128,8 @@ void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
         for (long j = 0; j < numChannels; ++j)
         {
         int* buffer = static_cast<int*>(bufferInfos[j].buffers[index]);
-        // buffer[i] = static_cast<int>(_buffer[i] * maxAmp);
-        buffer[i] = static_cast<int>(cos(2.*M_PI*((double)(current_time_micros())*0.00001)) * maxAmp);
+        buffer[i] = static_cast<int>(_buffer[i] * maxAmp);
+        // buffer[i] = static_cast<int>(cos(2.*M_PI*((double)(current_time_micros())*0.00001)) * maxAmp);
         }
     }
     if(_outputReady) ASIOOutputReady();
@@ -136,7 +137,7 @@ void audio_engine::audio_callback(ASIOTime *timeInfo, long index) {
 
 void audio_engine::audio_callback_engine(const std::chrono::microseconds hostTime, double currentSample, const std::size_t numSamples) {
     std::fill(_buffer.begin(), _buffer.end(), 0);
-    //test_BEEP(hostTime, currentSample, numSamples);
+    test_BEEP(hostTime, currentSample, numSamples);
     // TODO: VIA CALLBACKS
 }
 
@@ -201,4 +202,5 @@ void audio_engine::set_buffer_size(size_t size) {
 
 void audio_engine::set_sample_rate(double samplerate) {
     _sampleRate = samplerate;
+    _microsPerSample = 1e6/samplerate;
 }

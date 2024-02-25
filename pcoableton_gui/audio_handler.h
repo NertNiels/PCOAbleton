@@ -60,6 +60,7 @@ private:
     ASIOChannelInfo* _channelInfos;
     std::atomic<std::chrono::microseconds> _output_latency;
     std::vector<std::pair<long, long>> _sampleTimePoints;
+    double _microsPerSample;
 
     std::vector<double> _buffer;
     
@@ -79,35 +80,25 @@ private:
     void test_BEEP(const std::chrono::microseconds beginHostTime, double& currentSample, const std::size_t numSamples) {
         // Metronome frequencies
         static const double highTone = 1567.98;
-        static const double lowTone = 1000;
+        static const double lowTone = 400.6255;
 
-        // auto beginHostTime2 = beginHostTime;
-        // std::cout << std::this_thread::get_id << ": " << beginHostTime.count() << std::endl;
-
-        const auto microsPerSample = 1e6 / _sampleRate;
-        std::chrono::microseconds hostTime;
+        double hostTime = current_time_on_sample(currentSample);
         for(size_t i = 0; i < numSamples; i++) {
             double amplitude = 0;
-            hostTime = beginHostTime + std::chrono::microseconds(llround(static_cast<double>(i) * microsPerSample));
-            // const auto lastSampleHostTime = hostTime - std::chrono::microseconds(llround(microsPerSample));
-            // const auto seconds = std::chrono::duration_cast<std::chrono::duration<double>>(hostTime);
-            // const auto seconds = std::chrono::duration_cast<std::chrono::duration<double>>(hostTime);
-            // amplitude = cos(4.*M_PI*(currentSample/512));
-            amplitude = cos(2.*M_PI*hostTime.count()*0.001);
-            // std::cout << hostTime.count() << std::endl;
+            // amplitude = cos(2.*M_PI*((currentSample+i)/44100.)*lowTone); // Cosine wave per sample
+            amplitude = cos(2.*M_PI*((hostTime)/1e6)*lowTone); // Cosine wave per microseconds interval
             _buffer[i] = amplitude;
-            currentSample++;
+            hostTime += _microsPerSample;
         }
-
-        // std::cout << std::chrono::duration_cast<std::chrono::microseconds>
-        //                         (std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
-        
-        lastHostTime = hostTime;
     }
 
     long current_time_micros() {
-        static const auto nano_start_time = std::chrono::high_resolution_clock::now();
-        return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()-nano_start_time).count();
+        static const auto nano_start_time = std::chrono::steady_clock::now();
+        return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-nano_start_time).count();
+    }
+
+    double current_time_on_sample(double& currentSample) {
+        return currentSample * _microsPerSample;
     }
 
     std::pair<long, long> lineairRegression() {
