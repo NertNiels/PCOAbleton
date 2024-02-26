@@ -2,6 +2,11 @@
 
 double _quantum = 4.;
 
+metronome::metronome() : _link(120.) {
+    link_enabled(false);
+    set_metro(this);
+}
+
 bool metronome::link_enabled() {
     return _link.isEnabled();
 }
@@ -13,7 +18,7 @@ bool metronome::link_enabled(bool enabled) {
 
 
 int metronome::link_num_peers(){
-    return _link.numPeers();
+    return static_cast<int>(_link.numPeers());
 }
 
 // Get quantum
@@ -65,4 +70,49 @@ double metronome::link_beat(){
 double metronome::phase(){
     auto sessionState = _link.captureAppSessionState();
     return sessionState.phaseAtTime(now(), _quantum);
+}
+
+double metronome::phaseAtTime(std::chrono::microseconds time, double quantum) {
+    auto sessionState = _link.captureAppSessionState();
+    return sessionState.phaseAtTime(time, quantum);
+}
+
+double metronome::phaseAtTime(std::chrono::microseconds time) {
+    return phaseAtTime(time, _quantum);
+}
+
+
+void callback_audio(const double& timeAtStart, const double& sampleAtStart, const size_t& numSamples, std::vector<double>* buffer, std::chrono::microseconds& latency) {
+    static double timeLastClick = 0;
+    std::chrono::microseconds linkTimeLatency = metronome::global_metro()->now()+latency;
+
+    const double highTone = 1500.;
+    const double lowTone = 1000.;
+
+    double hostTime = timeAtStart;
+    const double microsPerSample = 1e6/44100.;
+    const std::chrono::microseconds microsPerSample_std(llround(microsPerSample));
+
+    for(size_t i = 0; i < numSamples; i++) {
+        double lastPhase = metronome::global_metro()->phaseAtTime(linkTimeLatency-microsPerSample_std, 1);
+        double phase = metronome::global_metro()->phaseAtTime(linkTimeLatency, 1);
+        if(phase < lastPhase) timeLastClick = hostTime;
+        lastPhase = phase;
+        double amplitude = 0;
+        double tone = floor(metronome::global_metro()->phaseAtTime(linkTimeLatency))==0 ? highTone : lowTone;
+        if(hostTime-timeLastClick < 100000) amplitude = cos(2.*M_PI*((hostTime)/1e6)*tone); // Cosine wave per microseconds interval
+        (*buffer)[i] = amplitude;
+        hostTime += microsPerSample;
+        linkTimeLatency += std::chrono::microseconds(llround(microsPerSample));
+    }
+}
+
+metronome* metronome::_metro = nullptr;
+
+metronome* metronome::global_metro() {
+    return _metro;
+}
+
+void metronome::set_metro(metronome* metro) {
+    _metro = metro;
 }

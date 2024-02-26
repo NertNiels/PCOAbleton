@@ -6,7 +6,7 @@ void guiapp::setup() {
     metro.link_enabled(true);
     
     static audio_handler::audio_engine engine;
-    
+    engine.callback_metronome = &callback_audio;
 }
 
 void guiapp::update() {

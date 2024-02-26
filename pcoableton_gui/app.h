@@ -7,7 +7,6 @@
 #include <pcoableton/metro.h>
 #include "audio_handler.h"
 
-
 class guiapp {
     
     private:

@@ -48,6 +48,8 @@ public:
     ~audio_engine();
     void audio_callback(ASIOTime *timeInfo, long index);
 
+    void (*callback_metronome) (const double& timeAtStart, const double& sampleAtStart, const size_t& numSamples, std::vector<double>* buffer, std::chrono::microseconds& latency);
+
 private:
     ASIODriverInfo _driver_info;
     long _inputChannels;
@@ -70,66 +72,15 @@ private:
     void start();
     void stop();
     void createAsioBuffers();
-    void audio_callback_engine(const std::chrono::microseconds hostTime, double currentSample, const std::size_t numSamples);
+    void audio_callback_engine(const double& hostTime, double& currentSample, const std::size_t& numSamples);
     void set_buffer_size(size_t size);
     void set_sample_rate(double samplerate);
     std::chrono::microseconds calculateTimeAtSamplePosition(ASIOTime *time);
     ASIOCallbacks _asio_callbacks;
 
-    std::chrono::microseconds lastHostTime;
-    void test_BEEP(const std::chrono::microseconds beginHostTime, double& currentSample, const std::size_t numSamples) {
-        // Metronome frequencies
-        static const double highTone = 1567.98;
-        static const double lowTone = 400.6255;
-
-        double hostTime = current_time_on_sample(currentSample);
-        for(size_t i = 0; i < numSamples; i++) {
-            double amplitude = 0;
-            // amplitude = cos(2.*M_PI*((currentSample+i)/44100.)*lowTone); // Cosine wave per sample
-            amplitude = cos(2.*M_PI*((hostTime)/1e6)*lowTone); // Cosine wave per microseconds interval
-            _buffer[i] = amplitude;
-            hostTime += _microsPerSample;
-        }
-    }
-
-    long current_time_micros() {
-        static const auto nano_start_time = std::chrono::steady_clock::now();
-        return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-nano_start_time).count();
-    }
-
     double current_time_on_sample(double& currentSample) {
         return currentSample * _microsPerSample;
     }
-
-    std::pair<long, long> lineairRegression() {
-        auto begin = _sampleTimePoints.begin();
-        auto end = _sampleTimePoints.end();
-
-        using NumberType = double;
-
-        NumberType sumX = 0.0;
-        NumberType sumXX = 0.0;
-        NumberType sumXY = 0.0;
-        NumberType sumY = 0.0;
-        for (auto i = begin; i != end; ++i)
-        {
-            sumX += i->first;
-            sumXX += i->first * i->first;
-            sumXY += i->first * i->second;
-            sumY += i->second;
-        }
-
-        const NumberType numPoints = static_cast<NumberType>(distance(begin, end));
-        const NumberType denominator = numPoints * sumXX - sumX * sumX;
-        const NumberType slope = denominator == NumberType{0}
-                                    ? NumberType{0}
-                                    : (numPoints * sumXY - sumX * sumY) / denominator;
-        const NumberType intercept = (sumY - slope * sumX) / numPoints;
-
-        return std::make_pair(slope, intercept);
-    }
-
-
 };
 
 static audio_engine *engine;

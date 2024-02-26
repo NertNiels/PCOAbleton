@@ -78,6 +78,7 @@ void print_serviceplanitems(std::string stype, std::string p) {
     }
 }
 
+#pragma warning(disable : 4996)
 void print_overview() {
     std::cout << "------------------------------------------" << std::endl;
     for(pcoapi::service_type a : service_types) {
