@@ -17,6 +17,7 @@ class metronome {
         bool playing();
         double current_tempo();
         double link_beat();
+        double link_beatAtTime(std::chrono::microseconds time);
         double phase();
         double phaseAtTime(std::chrono::microseconds time, double quantum);
         double phaseAtTime(std::chrono::microseconds time);

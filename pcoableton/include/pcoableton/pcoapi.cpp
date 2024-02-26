@@ -126,7 +126,6 @@ namespace pcoapi {
 
     void get_arrangementinfo(std::string song, std::string arrangement, float *bpm, std::string *meter) {
         nlohmann::json obj = callapi(api_services_songs+"/"+song+"/arrangements/"+arrangement);
-        std::cout << "DEBUG: " << obj << std::endl;
         *bpm = (obj["data"]["attributes"]["bpm"] == nullptr ? .0f : obj["data"]["attributes"]["bpm"]);
         *meter = (obj["data"]["attributes"]["meter"] == nullptr ? "" : obj["data"]["attributes"]["meter"]);
     }
@@ -179,10 +178,7 @@ namespace pcoapi {
     }
 
     organization get_organization() {
-        // nlohmann::json obj = callapi(api_root);
         organization o;
-        // o.person_first_name = (obj["attributes"]["first_name"]==nullptr ? "-" : obj["attributes"]["first_name"]);
-        // o.person_last_name = (obj["attributes"]["last_name"]==nullptr ? "-" : obj["attributes"]["last_name"]);
         o.service_types = get_servicetypes();
 
         return o;

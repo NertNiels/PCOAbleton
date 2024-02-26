@@ -74,8 +74,8 @@ void guiapp::update() {
         ImGui::Text("BPM: %.1f", opened_item->bpm);
         ImGui::Text(("Meter: " + opened_item->meter).c_str());
         if(ImGui::Button("Metronome")) {
-            metronome_state = !metronome_state;
-            std::cout << "metronome on: " << metronome_state << std::endl;
+            metro.current_tempo(opened_item->bpm);
+            metro.quantum(stoi(opened_item->meter.substr(0, 1)));
         }
     }
     
@@ -105,6 +105,8 @@ void guiapp::update() {
     ImGui::TableSetColumnIndex(0);
     ImGui::TableSetColumnIndex(1);
     ImGui::EndTable();
+
+    if(ImGui::Button(metro.playing() ? "Playing" : "Stopped")) metro.playing(!metro.playing());
 
     ImGui::End();
 

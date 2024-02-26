@@ -40,7 +40,8 @@ bool metronome::playing(){
 // Set playing
 bool metronome::playing(bool playing){
     auto sessionState = _link.captureAppSessionState();
-    sessionState.setIsPlayingAndRequestBeatAtTime(true, now(), 0., _quantum);
+    if(playing) sessionState.setIsPlayingAndRequestBeatAtTime(playing, now(), 0., _quantum);
+    else sessionState.setIsPlaying(playing, now());
     _link.commitAppSessionState(sessionState);
     return playing;
 }
@@ -66,6 +67,11 @@ double metronome::link_beat(){
     return sessionState.beatAtTime(now(), _quantum);
 }
 
+double metronome::link_beatAtTime(std::chrono::microseconds time){
+    auto sessionState = _link.captureAppSessionState();
+    return sessionState.beatAtTime(time, _quantum);
+}
+
 // Get phase
 double metronome::phase(){
     auto sessionState = _link.captureAppSessionState();
@@ -83,6 +89,8 @@ double metronome::phaseAtTime(std::chrono::microseconds time) {
 
 
 void callback_audio(const double& timeAtStart, const double& sampleAtStart, const size_t& numSamples, std::vector<double>* buffer, std::chrono::microseconds& latency) {
+    if(!metronome::global_metro()->playing()) return;
+    
     static double timeLastClick = 0;
     std::chrono::microseconds linkTimeLatency = metronome::global_metro()->now()+latency;
 
@@ -94,14 +102,16 @@ void callback_audio(const double& timeAtStart, const double& sampleAtStart, cons
     const std::chrono::microseconds microsPerSample_std(llround(microsPerSample));
 
     for(size_t i = 0; i < numSamples; i++) {
-        double lastPhase = metronome::global_metro()->phaseAtTime(linkTimeLatency-microsPerSample_std, 1);
-        double phase = metronome::global_metro()->phaseAtTime(linkTimeLatency, 1);
-        if(phase < lastPhase) timeLastClick = hostTime;
-        lastPhase = phase;
-        double amplitude = 0;
-        double tone = floor(metronome::global_metro()->phaseAtTime(linkTimeLatency))==0 ? highTone : lowTone;
-        if(hostTime-timeLastClick < 100000) amplitude = cos(2.*M_PI*((hostTime)/1e6)*tone); // Cosine wave per microseconds interval
-        (*buffer)[i] = amplitude;
+        if(metronome::global_metro()->link_beatAtTime(linkTimeLatency) >= 0.) {
+            double lastPhase = metronome::global_metro()->phaseAtTime(linkTimeLatency-microsPerSample_std, 1);
+            double phase = metronome::global_metro()->phaseAtTime(linkTimeLatency, 1);
+            if(phase < lastPhase) timeLastClick = hostTime;
+            lastPhase = phase;
+            double amplitude = 0;
+            double tone = floor(metronome::global_metro()->phaseAtTime(linkTimeLatency))==0 ? highTone : lowTone;
+            if(hostTime-timeLastClick < 100000) amplitude = cos(2.*M_PI*((hostTime)/1e6)*tone); // Cosine wave per microseconds interval
+            (*buffer)[i] = amplitude;
+        }
         hostTime += microsPerSample;
         linkTimeLatency += std::chrono::microseconds(llround(microsPerSample));
     }
