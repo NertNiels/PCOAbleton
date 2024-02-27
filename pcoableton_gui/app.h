@@ -4,9 +4,8 @@
 #include <iostream>
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <pcoableton/metro.h>
-#include "audio_handler.h"
 #include "setlist.h"
+#include "audio_handler.h"
 
 class guiapp {
     

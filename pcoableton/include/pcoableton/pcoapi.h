@@ -20,6 +20,8 @@ namespace pcoapi {
         float bpm;
         std::string meter;
         int length;
+
+        double beat_modifier = 1;
     };
 
     struct service_plan {

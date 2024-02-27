@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#pragma once
 #include <asiosys.h>
 #include <asio.h>
 #include <asiodrivers.h>

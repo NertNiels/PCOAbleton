@@ -1,4 +1,5 @@
 #pragma once
+#include <pcoableton/metro.h>
 #include <pcoableton/pcoapi.h>
 #include <iostream>
 #include <imgui.h>
@@ -17,8 +18,8 @@ public:
     pcoapi::service_plan_item& get_item(int index);
     std::vector<pcoapi::service_plan_item>& setlist::get_items();
 
-    pcoapi::service_plan_item operator[](int i) {
-        return items[i];
+    pcoapi::service_plan_item* operator[](int i) {
+        return &items[i];
     }
 
     size_t size() {
@@ -36,7 +37,7 @@ public:
     setlist_ui();
     ~setlist_ui();
 
-    void update_ui(pcoapi::organization& pco_organization);
+    void update_ui(pcoapi::organization& pco_organization, metronome& metro);
 
 private:
     setlist* _setlist = nullptr;
@@ -44,4 +45,7 @@ private:
     void load_setlist(pcoapi::service_plan* plan);
     void load_setlist_ui(pcoapi::organization& pco_organization);
     bool _loading_ui = false;
+
+    void load_item(pcoapi::service_plan_item* item, metronome& metro);
+    pcoapi::service_plan_item* item_ptr = nullptr;
 };
